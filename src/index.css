@@ -1,0 +1,5 @@
+@layer reset, base, tokens, recipes, utilities;
+
+.lucide {
+    stroke-width: 3px;
+}
