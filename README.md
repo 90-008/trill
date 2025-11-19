@@ -6,6 +6,8 @@ video using your profile picture.
 
 built with [solidjs](https://solidjs.com) and vite. uses [park-ui](https://park-ui.com) for components and [atcute](https://tangled.org/mary.my.id/atcute) for atproto interactions.
 
+see [trill.ptr.pet](https://trill.ptr.pet) for a hosted instance.
+
 ### usage
 
 1.  upload a voice memo or record one.
