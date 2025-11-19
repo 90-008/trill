@@ -1,5 +1,5 @@
-import { createSignal, onCleanup } from "solid-js";
-import { MicIcon } from "lucide-solid";
+import { createSignal, onCleanup, Show } from "solid-js";
+import { CircleStopIcon, MicIcon } from "lucide-solid";
 import { IconButton } from "./ui/icon-button";
 import { Popover } from "./ui/popover";
 import { AtprotoDid } from "@atcute/lexicons/syntax";
@@ -9,6 +9,7 @@ import { createTimeDifferenceFromNow } from "@solid-primitives/date";
 
 type MicRecorderProps = {
   selectedAccount: () => AtprotoDid | undefined;
+  holdToRecord?: boolean;
 };
 
 const MicRecorder = (props: MicRecorderProps) => {
@@ -33,6 +34,8 @@ const MicRecorder = (props: MicRecorderProps) => {
   const fallbackMimeType = isSafari ? "audio/mp4" : "audio/webm";
 
   const startRecording = async () => {
+    if (isRecording()) return;
+
     try {
       audioChunks = [];
 
@@ -168,13 +171,32 @@ const MicRecorder = (props: MicRecorderProps) => {
             size="md"
             variant={isRecording() ? "solid" : "subtle"}
             colorPalette={isRecording() ? "red" : undefined}
-            onMouseDown={startRecording}
-            onMouseUp={stopRecording}
-            onMouseLeave={stopRecording}
-            onTouchStart={startRecording}
-            onTouchEnd={stopRecording}
+            onClick={
+              !props.holdToRecord
+                ? () => (isRecording() ? stopRecording() : startRecording())
+                : undefined
+            }
+            onMouseDown={props.holdToRecord ? startRecording : undefined}
+            onMouseUp={props.holdToRecord ? stopRecording : undefined}
+            onMouseLeave={props.holdToRecord ? stopRecording : undefined}
+            onTouchStart={
+              props.holdToRecord
+                ? (e) => {
+                    e.preventDefault(); // Prevent mouse emulation
+                    startRecording();
+                  }
+                : undefined
+            }
+            onTouchEnd={
+              props.holdToRecord
+                ? (e) => {
+                    e.preventDefault();
+                    stopRecording();
+                  }
+                : undefined
+            }
           >
-            <MicIcon />
+            {isRecording() ? <CircleStopIcon /> : <MicIcon />}
           </IconButton>
         )}
       />

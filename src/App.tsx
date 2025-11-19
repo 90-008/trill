@@ -31,6 +31,7 @@ import Settings from "./components/Settings";
 import MicRecorder from "./components/MicRecorder";
 import { Link } from "./components/ui/link";
 import { css } from "styled-system/css";
+import { toggleToRecord } from "./lib/settings";
 
 const App = () => {
   const collection = () =>
@@ -273,7 +274,10 @@ const Upload = (props: FileUpload.RootProps) => {
               </Button>
             )}
           />
-          <MicRecorder selectedAccount={selectedAccount} />
+          <MicRecorder
+            selectedAccount={selectedAccount}
+            holdToRecord={!toggleToRecord()}
+          />
           {/*<IconButton
             size="sm"
             onClick={() =>
