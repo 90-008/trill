@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js";
+import { Component, createSignal, Signal } from "solid-js";
 
 import { SendIcon, XIcon } from "lucide-solid";
 import { Stack } from "styled-system/jsx";
@@ -16,19 +16,16 @@ import { Textarea } from "~/components/ui/textarea";
 import { Account } from "~/lib/accounts";
 
 const PostDialog = (props: {
-  trigger: Component;
   result: Blob;
   account: Account | undefined;
+  openSignal: Signal<boolean>;
 }) => {
   const [postContent, setPostContent] = createSignal<string>("");
   const [posting, setPosting] = createSignal(false);
-  const [open, setOpen] = createSignal(false);
+  const [open, setOpen] = props.openSignal;
 
   return (
     <Dialog.Root open={open()} onOpenChange={(e) => setOpen(e.open)}>
-      <Dialog.Trigger
-        asChild={(triggerProps) => <props.trigger {...triggerProps()} />}
-      />
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>

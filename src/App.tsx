@@ -162,6 +162,7 @@ type TasksProps = StackProps & {
 const Tasks = (props: TasksProps) => (
   <Stack
     border="1px solid var(--colors-border-subtle)"
+    borderBottomWidth="3px"
     gap="1.5"
     p="2"
     rounded="sm"
@@ -210,7 +211,7 @@ const getAudioClipboard = async () => {
 const Upload = (props: FileUpload.RootProps) => {
   return (
     <FileUpload.Root maxFiles={100} {...props}>
-      <FileUpload.Dropzone>
+      <FileUpload.Dropzone borderBottomWidth="3px">
         <FileUpload.Label>drop your files here</FileUpload.Label>
         <HStack alignItems="center">
           <FileUpload.Trigger

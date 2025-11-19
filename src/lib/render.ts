@@ -336,11 +336,12 @@ export const render = async (file: File, opts: RenderOptions) => {
     drawBackground();
 
     if (pfpImg) {
-      const pfpSize = Math.min(renderCanvas.width, renderCanvas.height) * 0.5;
-      const pfpX = (renderCanvas.width - pfpSize) / 2;
-      const pfpY = (renderCanvas.height - pfpSize) / 2;
+      const centerX = renderCanvas.width / 2;
+      const centerY = renderCanvas.height / 2;
+      const baseRadius =
+        Math.min(renderCanvas.width, renderCanvas.height) * 0.15;
 
-      drawPfp(ctx, pfpImg, pfpX, pfpY, pfpSize);
+      drawPfp(ctx, pfpImg, centerX, centerY, baseRadius);
     }
 
     await videoSource.add(0, duration);

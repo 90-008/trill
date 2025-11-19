@@ -99,11 +99,13 @@ const MicRecorder = (props: MicRecorderProps) => {
           mediaRecorder?.mimeType || mimeType || fallbackMimeType;
         const fileExtension = usedMime.split("/")[1]?.split(";")[0] || "webm";
         const blob = new Blob(audioChunks, { type: usedMime });
-        const file = new File(
-          [blob],
-          `rec-${new Date().toISOString().replace(/:/g, "-")}.${fileExtension}`,
-          { type: usedMime },
-        );
+        const fileDate = new Date()
+          .toLocaleTimeString()
+          .replace(/:/g, "-")
+          .replace(/\s+/g, "_");
+        const file = new File([blob], `rec-${fileDate}.${fileExtension}`, {
+          type: usedMime,
+        });
 
         addTask(props.selectedAccount(), file);
         audioChunks = [];

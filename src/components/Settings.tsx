@@ -224,13 +224,15 @@ const Settings = () => {
   };
 
   const Accounts = () => {
-    const item = (account: Account) => (
+    const item = (account: Account, isLatest: boolean) => (
       <Stack
         direction="row"
         w="full"
         px="2"
         pb="2"
-        borderBottom="1px solid var(--colors-border-muted)"
+        borderBottom={
+          !isLatest ? "1px solid var(--colors-border-muted)" : undefined
+        }
         align="center"
       >
         {account.handle ? `@${account.handle}` : account.did}
@@ -253,13 +255,17 @@ const Settings = () => {
           </Text>
         }
       >
-        {item}
+        {(acc, idx) => item(acc, idx() === accounts.length - 1)}
       </For>
     );
     return (
       <Stack>
         <FormLabel>accounts</FormLabel>
-        <Stack border="1px solid var(--colors-border-default)" rounded="xs">
+        <Stack
+          border="1px solid var(--colors-border-default)"
+          borderBottomWidth="3px"
+          rounded="xs"
+        >
           <Stack
             borderBottom="1px solid var(--colors-border-default)"
             p="2"
@@ -350,6 +356,7 @@ const Settings = () => {
                 <Stack
                   gap="0"
                   border="1px solid var(--colors-border-default)"
+                  borderBottomWidth="3px"
                   rounded="xs"
                 >
                   <Box borderBottom="1px solid var(--colors-border-subtle)">
@@ -376,13 +383,11 @@ const Settings = () => {
                       signal={[backgroundColor, setBackgroundColor]}
                     />
                   </Stack>
-                  <Box borderBottom="1px solid var(--colors-border-muted)">
-                    <SettingSelect
-                      label="frame rate"
-                      signal={[frameRate, setFrameRate]}
-                      collection={frameRateCollection}
-                    />
-                  </Box>
+                  <SettingSelect
+                    label="frame rate"
+                    signal={[frameRate, setFrameRate]}
+                    collection={frameRateCollection}
+                  />
                 </Stack>
               </Stack>
             </Stack>

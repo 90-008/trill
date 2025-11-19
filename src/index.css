@@ -3,3 +3,8 @@
 .lucide {
     stroke-width: 3px;
 }
+
+.input,
+.button--variant_outline {
+    border-bottom-width: 2px;
+}

@@ -1,4 +1,9 @@
-import { CircleAlertIcon, DownloadIcon, SendIcon } from "lucide-solid";
+import {
+  CircleAlertIcon,
+  DownloadIcon,
+  EllipsisVerticalIcon,
+  SendIcon,
+} from "lucide-solid";
 import { Stack } from "styled-system/jsx";
 import { IconButton } from "~/components/ui/icon-button";
 import { Spinner } from "~/components/ui/spinner";
@@ -9,6 +14,9 @@ import { Account } from "~/lib/accounts";
 
 import { TaskState } from "~/lib/task";
 import PostDialog from "./PostDialog";
+import { Button } from "./ui/button";
+import { Menu } from "./ui/menu";
+import { createSignal } from "solid-js";
 
 const downloadFile = (blob: Blob, fileName: string) => {
   const url = URL.createObjectURL(blob);
@@ -23,6 +31,7 @@ const downloadFile = (blob: Blob, fileName: string) => {
 };
 
 const Task = (process: TaskState, selectedAccount: Account | undefined) => {
+  const [dialogOpen, setDialogOpen] = createSignal(false);
   const statusError = (error: string) => (
     <Popover.Root>
       <Popover.Trigger
@@ -47,36 +56,58 @@ const Task = (process: TaskState, selectedAccount: Account | undefined) => {
   const statusSuccess = (result: Blob) => {
     return (
       <>
-        <IconButton
-          color={{ _hover: "colorPalette.emphasized" }}
-          onClick={() =>
-            downloadFile(
-              result,
-              process.file.name
-                .split(".")
-                .slice(0, -1)
-                .join(".")
-                .concat(".mp4"),
-            )
-          }
-          variant="ghost"
-        >
-          <DownloadIcon />
-        </IconButton>
         <PostDialog
-          trigger={(props) => (
-            <IconButton
-              {...props}
-              disabled={selectedAccount === undefined}
-              color={{ _hover: "colorPalette.emphasized" }}
-              variant="ghost"
-            >
-              <SendIcon />
-            </IconButton>
-          )}
+          openSignal={[dialogOpen, setDialogOpen]}
           account={selectedAccount}
           result={result}
         />
+        <Menu.Root
+          positioning={{ placement: "bottom-start", strategy: "fixed" }}
+        >
+          <Menu.Trigger
+            asChild={(triggerProps) => (
+              <IconButton {...triggerProps()} variant="ghost">
+                <EllipsisVerticalIcon />
+              </IconButton>
+            )}
+          />
+          <Menu.Positioner>
+            <Menu.Content>
+              <Menu.ItemGroup>
+                <Button
+                  color={{ _hover: "colorPalette.emphasized" }}
+                  onClick={() =>
+                    downloadFile(
+                      result,
+                      process.file.name
+                        .split(".")
+                        .slice(0, -1)
+                        .join(".")
+                        .concat(".mp4"),
+                    )
+                  }
+                  variant="ghost"
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  download <DownloadIcon />
+                </Button>
+                <Button
+                  onClick={() => setDialogOpen(!dialogOpen())}
+                  disabled={selectedAccount === undefined}
+                  color={{ _hover: "colorPalette.emphasized" }}
+                  variant="ghost"
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  post to bsky <SendIcon />
+                </Button>
+              </Menu.ItemGroup>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Menu.Root>
       </>
     );
   };
@@ -104,6 +135,7 @@ const Task = (process: TaskState, selectedAccount: Account | undefined) => {
     <Stack
       direction="row"
       border="1px solid var(--colors-border-muted)"
+      borderBottomWidth="2px"
       gap="2"
       align="center"
       rounded="sm"
