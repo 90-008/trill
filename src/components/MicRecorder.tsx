@@ -22,7 +22,7 @@ const MicRecorder = (props: MicRecorderProps) => {
   let mediaStream: MediaStream | null = null;
   let audioChunks: Blob[] = [];
 
-  const preferredMimeType = "audio/webm; codecs=opus";
+  const preferredMimeType = "audio/webm;codecs=opus";
   const fallbackMimeType = "audio/webm";
 
   const startRecording = async () => {
@@ -49,11 +49,12 @@ const MicRecorder = (props: MicRecorderProps) => {
       if (!audioTrack) throw "no audio track found";
 
       let mimeType = "";
-      if (MediaRecorder.isTypeSupported(preferredMimeType))
+      if (MediaRecorder.isTypeSupported(preferredMimeType)) {
         mimeType = preferredMimeType;
-      else if (MediaRecorder.isTypeSupported(fallbackMimeType))
+      } else if (MediaRecorder.isTypeSupported(fallbackMimeType)) {
+        console.warn(`falling back to ${fallbackMimeType} for recording audio`);
         mimeType = fallbackMimeType;
-      else {
+      } else {
         console.warn(
           `browser does not support preffered audio / container type.
           falling back to whatever the browser picks`,
@@ -97,6 +98,8 @@ const MicRecorder = (props: MicRecorderProps) => {
         const file = new File([blob], `rec-${fileDate}.${fileExtension}`, {
           type: usedMime,
         });
+
+        console.info(usedMime, file.size);
 
         addTask(props.selectedAccount(), file);
         audioChunks = [];

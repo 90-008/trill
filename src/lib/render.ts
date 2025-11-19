@@ -274,7 +274,7 @@ export const render = async (file: File, opts: RenderOptions) => {
   if (!audioTrack) throw "no audio track found.";
 
   if (!(await audioTrack.canDecode()))
-    throw "audio track cannot be decoded by browser.";
+    throw `audio track (${audioTrack.codec}) cannot be decoded by browser.`;
 
   const duration = opts.duration ?? (await audioTrack.computeDuration());
   if (!duration) throw "couldn't get audio duration.";
