@@ -5,8 +5,8 @@
   nodejs,
   makeBinaryWrapper,
   memos-modules,
-  VITE_OAUTH_REDIRECT_URL ? "http://127.0.0.1:3000",
   VITE_OAUTH_CLIENT_ID ? "http://localhost:3000",
+  VITE_OAUTH_REDIRECT_URL ? VITE_OAUTH_CLIENT_ID,
   VITE_CLIENT_URI ? VITE_OAUTH_CLIENT_ID,
 }:
 stdenv.mkDerivation {
