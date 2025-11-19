@@ -1,18 +1,10 @@
-import { createSignal, For } from "solid-js";
+import { For } from "solid-js";
 
-import {
-  CheckIcon,
-  ChevronsUpDownIcon,
-  ClipboardIcon,
-  HeartIcon,
-  MicIcon,
-  Trash2Icon,
-} from "lucide-solid";
+import { CheckIcon, ChevronsUpDownIcon } from "lucide-solid";
 import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
 import { Stack, Box, StackProps, HStack, VStack } from "styled-system/jsx";
 import { FileUpload } from "./components/ui/file-upload";
-import { IconButton } from "./components/ui/icon-button";
 import { Text } from "./components/ui/text";
 
 import { AtprotoDid } from "@atcute/lexicons/syntax";
@@ -30,8 +22,6 @@ import Task from "./components/FileTask";
 import Settings from "./components/Settings";
 import MicRecorder from "./components/MicRecorder";
 import { Link } from "./components/ui/link";
-import { css } from "styled-system/css";
-import { toggleToRecord } from "./lib/settings";
 
 const App = () => {
   const collection = () =>
@@ -274,10 +264,7 @@ const Upload = (props: FileUpload.RootProps) => {
               </Button>
             )}
           />
-          <MicRecorder
-            selectedAccount={selectedAccount}
-            holdToRecord={!toggleToRecord()}
-          />
+          <MicRecorder selectedAccount={selectedAccount} />
           {/*<IconButton
             size="sm"
             onClick={() =>

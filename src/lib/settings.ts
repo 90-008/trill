@@ -1,5 +1,3 @@
-import { createSignal } from "solid-js";
-
 export const setting = <T>(key: string) => {
   return {
     get: () => {
@@ -19,15 +17,3 @@ export const showProfilePicture = setting<boolean>("showProfilePicture");
 export const useDominantColorAsBg = setting<boolean>("useDominantColorAsBg");
 export const backgroundColor = setting<string>("backgroundColor");
 export const frameRate = setting<number>("frameRate");
-
-export const toggleToRecordSetting = setting<boolean>("toggleToRecord");
-const [_toggleToRecord, _setToggleToRecord] = createSignal<boolean>(
-  toggleToRecordSetting.get() ?? false,
-);
-export const toggleToRecord = _toggleToRecord;
-export const setToggleToRecord = (
-  value: boolean | ((prev: boolean) => boolean),
-) => {
-  const newAccounts = _setToggleToRecord(value);
-  toggleToRecordSetting.set(newAccounts);
-};

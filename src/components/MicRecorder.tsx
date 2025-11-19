@@ -9,7 +9,6 @@ import { createTimeDifferenceFromNow } from "@solid-primitives/date";
 
 type MicRecorderProps = {
   selectedAccount: () => AtprotoDid | undefined;
-  holdToRecord?: boolean;
 };
 
 const MicRecorder = (props: MicRecorderProps) => {
@@ -23,6 +22,9 @@ const MicRecorder = (props: MicRecorderProps) => {
   let mediaStream: MediaStream | null = null;
   let audioChunks: Blob[] = [];
 
+  // Flag to handle case where user releases hold before recording actually starts
+  let stopRequestPending = false;
+
   const isSafari =
     typeof navigator !== "undefined" &&
     navigator.vendor &&
@@ -35,6 +37,7 @@ const MicRecorder = (props: MicRecorderProps) => {
 
   const startRecording = async () => {
     if (isRecording()) return;
+    stopRequestPending = false;
 
     try {
       audioChunks = [];
@@ -55,6 +58,14 @@ const MicRecorder = (props: MicRecorderProps) => {
           echoCancellation: { ideal: true },
         },
       });
+
+      // check if holding stopped while waiting for permission/stream
+      if (stopRequestPending) {
+        mediaStream.getTracks().forEach((track) => track.stop());
+        mediaStream = null;
+        return;
+      }
+
       const audioTrack = mediaStream.getAudioTracks()[0] ?? null;
       if (!audioTrack) throw "no audio track found";
 
@@ -129,6 +140,9 @@ const MicRecorder = (props: MicRecorderProps) => {
 
       setIsRecording(true);
       setRecordingStart(Date.now());
+
+      // delayed hold release
+      if (stopRequestPending) stopRecording();
     } catch (error) {
       console.error("error accessing microphone:", error);
       toaster.create({
@@ -145,7 +159,10 @@ const MicRecorder = (props: MicRecorderProps) => {
   };
 
   const stopRecording = () => {
-    if (!isRecording() || !mediaRecorder) return;
+    if (!isRecording() || !mediaRecorder) {
+      stopRequestPending = true;
+      return;
+    }
     if (mediaRecorder.state !== "inactive") mediaRecorder.stop();
     setIsRecording(false);
   };
@@ -162,6 +179,36 @@ const MicRecorder = (props: MicRecorderProps) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  let pressStartTime = 0;
+  let startedSession = false;
+
+  const handlePointerDown = (e: PointerEvent) => {
+    if (isRecording()) {
+      stopRecording();
+      startedSession = false;
+    } else {
+      startRecording();
+      pressStartTime = Date.now();
+      startedSession = true;
+    }
+  };
+
+  const handlePointerUp = (e: PointerEvent) => {
+    if (startedSession) {
+      const duration = Date.now() - pressStartTime;
+      if (duration >= 500) stopRecording();
+
+      startedSession = false;
+    }
+  };
+
+  const handlePointerLeave = (e: PointerEvent) => {
+    if (startedSession && isRecording()) {
+      stopRecording();
+      startedSession = false;
+    }
+  };
+
   return (
     <Popover.Root positioning={{ placement: "top" }} open={isRecording()}>
       <Popover.Anchor
@@ -171,30 +218,10 @@ const MicRecorder = (props: MicRecorderProps) => {
             size="md"
             variant={isRecording() ? "solid" : "subtle"}
             colorPalette={isRecording() ? "red" : undefined}
-            onClick={
-              !props.holdToRecord
-                ? () => (isRecording() ? stopRecording() : startRecording())
-                : undefined
-            }
-            onMouseDown={props.holdToRecord ? startRecording : undefined}
-            onMouseUp={props.holdToRecord ? stopRecording : undefined}
-            onMouseLeave={props.holdToRecord ? stopRecording : undefined}
-            onTouchStart={
-              props.holdToRecord
-                ? (e) => {
-                    e.preventDefault(); // Prevent mouse emulation
-                    startRecording();
-                  }
-                : undefined
-            }
-            onTouchEnd={
-              props.holdToRecord
-                ? (e) => {
-                    e.preventDefault();
-                    stopRecording();
-                  }
-                : undefined
-            }
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerLeave}
+            onContextMenu={(e) => e.preventDefault()}
           >
             {isRecording() ? <CircleStopIcon /> : <MicIcon />}
           </IconButton>

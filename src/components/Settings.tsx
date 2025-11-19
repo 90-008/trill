@@ -34,10 +34,7 @@ import {
   backgroundColor as backgroundColorSetting,
   frameRate as frameRateSetting,
   useDominantColorAsBg as useDominantColorAsBgSetting,
-  toggleToRecordSetting,
   Setting,
-  toggleToRecord,
-  setToggleToRecord,
 } from "~/lib/settings";
 import { handleResolver } from "~/lib/at";
 import { toaster } from "~/components/Toaster";
@@ -354,21 +351,6 @@ const Settings = () => {
           <Drawer.Body>
             <Stack gap="4">
               <Accounts />
-              <Stack>
-                <FormLabel>user interface</FormLabel>
-                <Stack
-                  gap="0"
-                  border="1px solid var(--colors-border-default)"
-                  borderBottomWidth="3px"
-                  rounded="xs"
-                >
-                  <SettingCheckbox
-                    label="use toggle to record"
-                    setting={toggleToRecordSetting}
-                    signal={[toggleToRecord, setToggleToRecord]}
-                  />
-                </Stack>
-              </Stack>
               <Stack>
                 <FormLabel>processing</FormLabel>
                 <Stack
