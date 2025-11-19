@@ -5,28 +5,35 @@
   nodejs,
   makeBinaryWrapper,
   memos-modules,
-  PUBLIC_DOMAIN ? "http://localhost:5173",
+  VITE_OAUTH_REDIRECT_URL ? "http://127.0.0.1:3000",
+  VITE_OAUTH_CLIENT_ID ? "http://localhost:3000",
+  VITE_CLIENT_URI ? VITE_OAUTH_CLIENT_ID,
 }:
 stdenv.mkDerivation {
-  name = "memos";
+  name = "trill";
 
   src = lib.fileset.toSource {
     root = ../.;
     fileset = lib.fileset.unions [
       ../src
-      ../static
+      ../index.html
       ../deno.lock
       ../package.json
-      ../svelte.config.js
       ../tsconfig.json
       ../vite.config.ts
+      ../postcss.config.cjs
+      ../panda.config.ts
     ];
   };
 
-  nativeBuildInputs = [makeBinaryWrapper];
-  buildInputs = [deno];
+  nativeBuildInputs = [ makeBinaryWrapper ];
+  buildInputs = [ deno ];
 
-  inherit PUBLIC_DOMAIN;
+  inherit
+    VITE_OAUTH_REDIRECT_URL
+    VITE_OAUTH_CLIENT_ID
+    VITE_CLIENT_URI
+    ;
 
   dontCheck = true;
 
@@ -34,8 +41,9 @@ stdenv.mkDerivation {
     runHook preConfigure
     cp -R --no-preserve=ownership ${memos-modules} node_modules
     find node_modules -type d -exec chmod 755 {} \;
-    substituteInPlace node_modules/.bin/vite \
-      --replace-fail "/usr/bin/env node" "${nodejs}/bin/node"
+    substituteInPlace node_modules/.bin/* \
+      --replace "/usr/bin/env node" "${nodejs}/bin/node"
+    ./node_modules/.bin/panda codegen
     runHook postConfigure
   '';
   buildPhase = ''
@@ -45,11 +53,8 @@ stdenv.mkDerivation {
   '';
   installPhase = ''
     runHook preInstall
-
-    mkdir -p $out/bin
-    cp -R ./build/* $out
-    # cp -R ./node_modules $out
-
+    mkdir -p $out
+    cp -R ./dist/* $out
     runHook postInstall
   '';
 }

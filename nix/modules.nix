@@ -4,7 +4,7 @@
   deno,
 }:
 stdenv.mkDerivation {
-  name = "memos-modules";
+  name = "trill-modules";
 
   src = lib.fileset.toSource {
     root = ../.;
@@ -14,11 +14,11 @@ stdenv.mkDerivation {
     ];
   };
 
-  outputHash = "sha256-s5rq8htDjR0I8MxPtLq1NYIywXGEdYbZZvE7I5+TCIU=";
+  outputHash = "sha256-xWXPFCV7rXsMQLVNLl0YoCOeIYsQJaT/wLfVrFzjsZ4=";
   outputHashAlgo = "sha256";
   outputHashMode = "recursive";
 
-  nativeBuildInputs = [deno];
+  nativeBuildInputs = [ deno ];
 
   dontConfigure = true;
   dontCheck = true;
