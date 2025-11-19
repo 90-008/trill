@@ -116,10 +116,10 @@ const App = () => {
           </Card.Title>
           <Card.Description>
             <ol>
-              <li>1. upload a voice memo</li>
+              <li>1. upload a voice memo or record one.</li>
               <li>2. it will automatically be converted to a video</li>
               <li>
-                3. (optional) add an account for posting and using pfp in video
+                3. (optional) add an account to enable bluesky integration.
               </li>
             </ol>
           </Card.Description>
