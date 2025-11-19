@@ -1,36 +1,29 @@
-## Usage
+## trill
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+a webapp that converts voice memos into videos, ready for posting on bluesky (or perhaps elsewhere!).
+it lets you upload audio files or record directly from the microphone, and automatically generates a
+video using your profile picture.
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
+built with [solidjs](https://solidjs.com) and vite. uses [park-ui](https://park-ui.com) for components and [atcute](https://tangled.org/mary.my.id/atcute) for atproto interactions.
+
+### usage
+
+1.  upload a voice memo or record one.
+2.  it will automatically be converted to a video.
+3.  (optional) add an account to enable bluesky integration.
+
+### running
+
+#### with nix
+
+- build the project: `nix build .#memos`
+- enter the dev shell: `nix develop`
+
+#### manually
+
+you'll need deno.
 
 ```bash
-$ npm install # or pnpm install or yarn install
+deno install && panda codegen
+deno task dev # or deno task build
 ```
-
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm run dev` or `npm start`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
-
-## This project was created with the [Solid CLI](https://github.com/solidjs-community/solid-cli)
