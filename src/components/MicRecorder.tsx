@@ -22,8 +22,15 @@ const MicRecorder = (props: MicRecorderProps) => {
   let mediaStream: MediaStream | null = null;
   let audioChunks: Blob[] = [];
 
-  const preferredMimeType = "audio/webm;codecs=opus";
-  const fallbackMimeType = "audio/webm";
+  const isSafari =
+    typeof navigator !== "undefined" &&
+    navigator.vendor &&
+    navigator.vendor.indexOf("Apple") > -1;
+
+  const preferredMimeType = isSafari
+    ? 'audio/mp4; codecs="mp4a.40.2"'
+    : "audio/webm;codecs=opus";
+  const fallbackMimeType = isSafari ? "audio/mp4" : "audio/webm";
 
   const startRecording = async () => {
     try {
