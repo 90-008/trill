@@ -4,12 +4,13 @@ import {
   CheckIcon,
   ChevronsUpDownIcon,
   ClipboardIcon,
+  HeartIcon,
   MicIcon,
   Trash2Icon,
 } from "lucide-solid";
 import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
-import { Stack, Box, StackProps, HStack } from "styled-system/jsx";
+import { Stack, Box, StackProps, HStack, VStack } from "styled-system/jsx";
 import { FileUpload } from "./components/ui/file-upload";
 import { IconButton } from "./components/ui/icon-button";
 import { Text } from "./components/ui/text";
@@ -28,6 +29,8 @@ import { addTask, tasks, TaskState } from "./lib/task";
 import Task from "./components/FileTask";
 import Settings from "./components/Settings";
 import MicRecorder from "./components/MicRecorder";
+import { Link } from "./components/ui/link";
+import { css } from "styled-system/css";
 
 const App = () => {
   const collection = () =>
@@ -96,60 +99,109 @@ const App = () => {
   );
 
   return (
-    <Box
-      py="8"
-      minH="100vh"
-      minW="100vw"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Card.Root maxW="3xl" w="94%" h="max">
-        <Card.Header>
-          <Card.Title w="full">
-            <Stack direction="row" align="center">
-              <Text>trill</Text>
-              <div style="flex-grow: 1;"></div>
-              <AccountSelect />
-              <Settings />
+    <>
+      <VStack
+        py="8"
+        minH="100vh"
+        minW="100vw"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Card.Root maxW="3xl" w="94%" h="max">
+          <Card.Header>
+            <Card.Title w="full">
+              <Stack direction="row" align="center">
+                <Text>trill</Text>
+                <div style="flex-grow: 1;"></div>
+                <AccountSelect />
+                <Settings />
+              </Stack>
+            </Card.Title>
+            <Card.Description>
+              <ol>
+                <li>1. upload a voice memo or record one.</li>
+                <li>2. it will automatically be converted to a video</li>
+                <li>
+                  3. (optional) add an account to enable bluesky integration.
+                </li>
+              </ol>
+            </Card.Description>
+          </Card.Header>
+          <Card.Body>
+            <Stack gap="4" direction={{ base: "row", smDown: "column" }}>
+              <Upload
+                flex="4"
+                acceptedFiles={[]}
+                onFileAccept={(e) =>
+                  e.files.forEach((file) => addTask(selectedAccount(), file))
+                }
+              />
+              <Tasks
+                flex="3"
+                minH="20rem"
+                maxH="20rem"
+                minW="0"
+                overflowY="scroll"
+                currentTasks={tasks.values().toArray()}
+                selectedAccount={accounts().find(
+                  (account) => account.did === selectedAccount(),
+                )}
+              />
             </Stack>
-          </Card.Title>
-          <Card.Description>
-            <ol>
-              <li>1. upload a voice memo or record one.</li>
-              <li>2. it will automatically be converted to a video</li>
-              <li>
-                3. (optional) add an account to enable bluesky integration.
-              </li>
-            </ol>
-          </Card.Description>
-        </Card.Header>
-        <Card.Body>
-          <Stack gap="4" direction={{ base: "row", smDown: "column" }}>
-            <Upload
-              flex="4"
-              acceptedFiles={[]}
-              onFileAccept={(e) =>
-                e.files.forEach((file) => addTask(selectedAccount(), file))
-              }
-            />
-            <Tasks
-              flex="3"
-              minH="20rem"
-              maxH="20rem"
-              minW="0"
-              overflowY="scroll"
-              currentTasks={tasks.values().toArray()}
-              selectedAccount={accounts().find(
-                (account) => account.did === selectedAccount(),
-              )}
-            />
-          </Stack>
-        </Card.Body>
-        {/*<Card.Footer gap="3"></Card.Footer>*/}
-      </Card.Root>
+          </Card.Body>
+        </Card.Root>
+        <Card.Root maxW="3xl" w="94%">
+          <Card.Header py="2" px="4">
+            <Card.Description>
+              <HStack justifyContent="space-between" alignItems="center">
+                <Text>
+                  /made by{" "}
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://gaze.systems"
+                  >
+                    90008
+                  </Link>
+                  /
+                </Text>
+                <Link
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href="https://github.com/sponsors/90-008"
+                  transition="all"
+                  transitionDuration="250ms"
+                  color={{ _hover: "red" }}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M11.8 1c-1.682 0-3.129 1.368-3.799 2.797C7.33 2.368 5.883 1 4.201 1a4.2 4.2 0 0 0-4.2 4.2c0 4.716 4.758 5.953 8 10.616c3.065-4.634 8-6.05 8-10.616c0-2.319-1.882-4.2-4.2-4.2z"
+                    />
+                  </svg>
+                </Link>
+                <Text>
+                  source on{" "}
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href="https://tangled.org/did:plc:dfl62fgb7wtjj3fcbb72naae/trill"
+                  >
+                    tangled
+                  </Link>
+                </Text>
+              </HStack>
+            </Card.Description>
+          </Card.Header>
+        </Card.Root>
+      </VStack>
       <Toaster />
-    </Box>
+    </>
   );
 };
 export default App;
