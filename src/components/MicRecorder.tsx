@@ -38,15 +38,6 @@ const MicRecorder = (props: MicRecorderProps) => {
         return;
       }
 
-      if (!navigator.mediaDevices) {
-        toaster.create({
-          title: "recording not supported",
-          description: "website is not running in a secure context.",
-          type: "error",
-        });
-        return;
-      }
-
       mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           autoGainControl: { ideal: true },
