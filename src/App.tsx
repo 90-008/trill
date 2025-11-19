@@ -108,7 +108,7 @@ const App = () => {
         <Card.Header>
           <Card.Title w="full">
             <Stack direction="row" align="center">
-              <Text>memos</Text>
+              <Text>trill</Text>
               <div style="flex-grow: 1;"></div>
               <AccountSelect />
               <Settings />
