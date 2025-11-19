@@ -161,7 +161,7 @@ const App = () => {
                     rel="noopener noreferrer"
                     href="https://gaze.systems"
                   >
-                    90008
+                    {Math.random() < 0.98 ? "dawn" : "90008"}
                   </Link>
                   /
                 </Text>
