@@ -28,7 +28,11 @@ const generateId = () => _idCounter++;
 const fac = new FastAverageColor();
 
 export const tasks = new ReactiveMap<number, TaskState>();
-export const addTask = async (did: AtprotoDid | undefined, file: File) => {
+export const addTask = async (
+  did: AtprotoDid | undefined,
+  file: File,
+  duration?: number,
+) => {
   const id = generateId();
   tasks.set(id, { status: "processing", file });
   try {
@@ -81,6 +85,7 @@ export const addTask = async (did: AtprotoDid | undefined, file: File) => {
       visualizer: showVisualizer.get() ?? true,
       frameRate: frameRate.get() ?? 30,
       bgColor,
+      duration,
     });
     tasks.set(id, {
       file,

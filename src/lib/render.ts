@@ -249,6 +249,7 @@ type RenderOptions = {
   visualizer: boolean;
   frameRate: number;
   bgColor: string;
+  duration?: number;
 };
 
 export const render = async (file: File, opts: RenderOptions) => {
@@ -270,10 +271,13 @@ export const render = async (file: File, opts: RenderOptions) => {
   });
 
   const audioTrack = await input.getPrimaryAudioTrack();
-  if (!audioTrack) throw new Error("no audio track found.");
+  if (!audioTrack) throw "no audio track found.";
 
-  const duration = await input.computeDuration();
-  if (!duration) throw new Error("couldn't get audio duration.");
+  if (!(await audioTrack.canDecode()))
+    throw "audio track cannot be decoded by browser.";
+
+  const duration = opts.duration ?? (await audioTrack.computeDuration());
+  if (!duration) throw "couldn't get audio duration.";
 
   const videoCodec = await getFirstEncodableVideoCodec(
     new Mp4OutputFormat().getSupportedVideoCodecs(),
@@ -282,11 +286,10 @@ export const render = async (file: File, opts: RenderOptions) => {
       height: renderCanvas.height,
     },
   );
-  if (!videoCodec)
-    throw new Error("your browser doesn't support video encoding.");
+  if (!videoCodec) throw "your browser doesn't support video encoding.";
 
   const ctx = renderCanvas.getContext("2d");
-  if (!ctx) throw new Error("couldn't get canvas context.");
+  if (!ctx) throw "couldn't get canvas context.";
 
   const output = new MediaOutput({
     format: new Mp4OutputFormat({

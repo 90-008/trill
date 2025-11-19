@@ -4,6 +4,7 @@ import {
   CheckIcon,
   ChevronsUpDownIcon,
   ClipboardIcon,
+  MicIcon,
   Trash2Icon,
 } from "lucide-solid";
 import { Button } from "./components/ui/button";
@@ -26,6 +27,7 @@ import { createListCollection, Select } from "./components/ui/select";
 import { addTask, tasks, TaskState } from "./lib/task";
 import Task from "./components/FileTask";
 import Settings from "./components/Settings";
+import MicRecorder from "./components/MicRecorder";
 
 const App = () => {
   const collection = () =>
@@ -95,17 +97,18 @@ const App = () => {
 
   return (
     <Box
-      w="100vw"
-      h="100vh"
+      py="8"
+      minH="100vh"
+      minW="100vw"
       display="flex"
       justifyContent="center"
       alignItems="center"
     >
-      <Card.Root maxW="3xl" w="90%">
+      <Card.Root maxW="3xl" w="94%" h="max">
         <Card.Header>
           <Card.Title w="full">
             <Stack direction="row" align="center">
-              <Text>bsky voice memo</Text>
+              <Text>memos</Text>
               <div style="flex-grow: 1;"></div>
               <AccountSelect />
               <Settings />
@@ -122,10 +125,7 @@ const App = () => {
           </Card.Description>
         </Card.Header>
         <Card.Body>
-          <Stack
-            gap={{ base: "4", smDown: "0" }}
-            direction={{ base: "row", smDown: "column" }}
-          >
+          <Stack gap="4" direction={{ base: "row", smDown: "column" }}>
             <Upload
               flex="4"
               acceptedFiles={[]}
@@ -220,6 +220,7 @@ const Upload = (props: FileUpload.RootProps) => {
               </Button>
             )}
           />
+          <MicRecorder selectedAccount={selectedAccount} />
           {/*<IconButton
             size="sm"
             onClick={() =>
@@ -234,30 +235,6 @@ const Upload = (props: FileUpload.RootProps) => {
           </IconButton>*/}
         </HStack>
       </FileUpload.Dropzone>
-      <FileUpload.ItemGroup>
-        <FileUpload.Context>
-          {(fileUpload) => (
-            <For each={fileUpload().acceptedFiles}>
-              {(file) => (
-                <FileUpload.Item file={file}>
-                  <FileUpload.ItemPreview type="image/*">
-                    <FileUpload.ItemPreviewImage />
-                  </FileUpload.ItemPreview>
-                  <FileUpload.ItemName />
-                  <FileUpload.ItemSizeText />
-                  <FileUpload.ItemDeleteTrigger
-                    asChild={(triggerProps) => (
-                      <IconButton variant="link" size="sm" {...triggerProps()}>
-                        <Trash2Icon />
-                      </IconButton>
-                    )}
-                  />
-                </FileUpload.Item>
-              )}
-            </For>
-          )}
-        </FileUpload.Context>
-      </FileUpload.ItemGroup>
       <FileUpload.HiddenInput />
     </FileUpload.Root>
   );
