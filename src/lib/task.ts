@@ -6,6 +6,7 @@ import {
   showProfilePicture,
   showVisualizer,
   useDominantColorAsBg,
+  autoTranscribe,
 } from "./settings";
 import { getSessionClient } from "./oauth";
 import { is } from "@atcute/lexicons";
@@ -15,11 +16,12 @@ import { render } from "./render";
 import { FastAverageColor } from "fast-average-color";
 import { toaster } from "~/components/Toaster";
 import { parseColor } from "@ark-ui/solid";
+import { transcribe } from "./transcribe";
 
 export type TaskState = { file: File } & (
   | { status: "processing" }
   | { status: "error"; error: string }
-  | { status: "success"; result: Blob }
+  | { status: "success"; result: Blob; altText?: string }
 );
 
 let _idCounter = 0;
@@ -80,17 +82,23 @@ export const addTask = async (
         });
       }
     }
-    const result = await render(file, {
-      pfpUrl,
-      visualizer: showVisualizer.get() ?? true,
-      frameRate: frameRate.get() ?? 30,
-      bgColor,
-      duration,
-    });
+    const [result, altText] = await Promise.all([
+      render(file, {
+        pfpUrl,
+        visualizer: showVisualizer.get() ?? true,
+        frameRate: frameRate.get() ?? 30,
+        bgColor,
+        duration,
+      }),
+      (autoTranscribe.get() ?? false)
+        ? transcribe(file)
+        : Promise.resolve(undefined),
+    ]);
     tasks.set(id, {
       file,
       status: "success",
       result,
+      altText,
     });
   } catch (error) {
     console.error(error);

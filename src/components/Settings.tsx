@@ -1,4 +1,4 @@
-import { createSignal, For, Signal } from "solid-js";
+import { Component, createSignal, For, JSXElement, Signal } from "solid-js";
 
 import {
   CheckIcon,
@@ -34,7 +34,10 @@ import {
   backgroundColor as backgroundColorSetting,
   frameRate as frameRateSetting,
   useDominantColorAsBg as useDominantColorAsBgSetting,
+  autoTranscribe as autoTranscribeSetting,
+  whisperModel as whisperModelSetting,
   Setting,
+  defaultWhisperModel,
 } from "~/lib/settings";
 import { handleResolver } from "~/lib/at";
 import { toaster } from "~/components/Toaster";
@@ -43,6 +46,7 @@ import { createListCollection, Select } from "~/components/ui/select";
 import { type Color, type ListCollection, parseColor } from "@ark-ui/solid";
 import { ColorPicker } from "~/components/ui/color-picker";
 import { Input } from "~/components/ui/input";
+import { preloadModel } from "~/lib/transcribe";
 
 const SettingCheckbox = (props: {
   setting: Setting<boolean>;
@@ -191,6 +195,26 @@ const SettingColorPicker = (props: {
   );
 };
 
+const Category = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: JSXElement;
+}) => (
+  <Stack>
+    <FormLabel>{title}</FormLabel>
+    <Stack
+      gap="0"
+      border="1px solid var(--colors-border-default)"
+      borderBottomWidth="3px"
+      rounded="xs"
+    >
+      {children}
+    </Stack>
+  </Stack>
+);
+
 const Settings = () => {
   const [handle, setHandle] = createSignal("");
   const isHandleValid = () => isHandle(handle());
@@ -259,34 +283,28 @@ const Settings = () => {
       </For>
     );
     return (
-      <Stack>
-        <FormLabel>accounts</FormLabel>
+      <Category title="accounts">
         <Stack
-          border="1px solid var(--colors-border-default)"
-          borderBottomWidth="3px"
-          rounded="xs"
+          borderBottom="1px solid var(--colors-border-default)"
+          p="2"
+          marginBottom="2"
+          direction="row"
+          gap="2"
+          w="full"
         >
-          <Stack
-            borderBottom="1px solid var(--colors-border-default)"
-            p="2"
-            direction="row"
-            gap="2"
-            w="full"
-          >
-            <Field.Root w="full">
-              <Field.Input
-                placeholder="example.bsky.social"
-                value={handle()}
-                onInput={(e) => setHandle(e.currentTarget.value)}
-              />
-            </Field.Root>
-            <IconButton onClick={startAccountFlow} disabled={!isHandleValid()}>
-              <PlusIcon />
-            </IconButton>
-          </Stack>
-          {items(accounts())}
+          <Field.Root w="full">
+            <Field.Input
+              placeholder="example.bsky.social"
+              value={handle()}
+              onInput={(e) => setHandle(e.currentTarget.value)}
+            />
+          </Field.Root>
+          <IconButton onClick={startAccountFlow} disabled={!isHandleValid()}>
+            <PlusIcon />
+          </IconButton>
         </Stack>
-      </Stack>
+        {items(accounts())}
+      </Category>
     );
   };
 
@@ -322,6 +340,28 @@ const Settings = () => {
     backgroundColorSetting.set(newColor.toString("rgb"));
   };
 
+  const whisperModelCollection = createListCollection({
+    items: [
+      { tag: "tiny", size: "40MB" },
+      { tag: "base", size: "80MB" },
+      { tag: "small", size: "250MB" },
+    ].map((model) => ({
+      label: `${model.tag} (${model.size})`,
+      value: `onnx-community/whisper-${model.tag}`,
+    })),
+  });
+  const [whisperModel, _setWhisperModel] = createSignal(
+    (whisperModelSetting.get() ?? defaultWhisperModel).toString(),
+  );
+  const setWhisperModel = (value: string | ((prev: string) => string)) => {
+    const newModel = _setWhisperModel(value);
+    whisperModelSetting.set(newModel);
+    if (autoTranscribe()) setTimeout(() => preloadModel(), 200);
+  };
+  const [autoTranscribe, setAutoTranscribe] = createSignal(
+    autoTranscribeSetting.get() ?? false,
+  );
+
   return (
     <Drawer.Root>
       <Drawer.Trigger
@@ -351,45 +391,63 @@ const Settings = () => {
           <Drawer.Body>
             <Stack gap="4">
               <Accounts />
-              <Stack>
-                <FormLabel>processing</FormLabel>
-                <Stack
-                  gap="0"
-                  border="1px solid var(--colors-border-default)"
-                  borderBottomWidth="3px"
-                  rounded="xs"
-                >
-                  <Box borderBottom="1px solid var(--colors-border-subtle)">
-                    <SettingCheckbox
-                      label="show profile picture"
-                      setting={showProfilePictureSetting}
-                      signal={[showProfilePicture, setShowProfilePicture]}
-                    />
-                  </Box>
+              <Category title="video processing">
+                <Box borderBottom="1px solid var(--colors-border-subtle)">
                   <SettingCheckbox
-                    label="show visualizer"
-                    setting={showVisualizerSetting}
-                    signal={[showVisualizer, setShowVisualizer]}
+                    label="show profile picture"
+                    setting={showProfilePictureSetting}
+                    signal={[showProfilePicture, setShowProfilePicture]}
                   />
-                  <Stack gap="0" borderY="1px solid var(--colors-border-muted)">
-                    <SettingCheckbox
-                      label="use dominant color as bg"
-                      setting={useDominantColorAsBgSetting}
-                      signal={[useDominantColorAsBg, setUseDominantColorAsBg]}
-                      disabled={!showProfilePicture()}
-                    />
-                    <SettingColorPicker
-                      label="background color"
-                      signal={[backgroundColor, setBackgroundColor]}
-                    />
-                  </Stack>
-                  <SettingSelect
-                    label="frame rate"
-                    signal={[frameRate, setFrameRate]}
-                    collection={frameRateCollection}
+                </Box>
+                <SettingCheckbox
+                  label="show visualizer"
+                  setting={showVisualizerSetting}
+                  signal={[showVisualizer, setShowVisualizer]}
+                />
+                <Stack gap="0" borderY="1px solid var(--colors-border-muted)">
+                  <SettingCheckbox
+                    label="use dominant color as bg"
+                    setting={useDominantColorAsBgSetting}
+                    signal={[useDominantColorAsBg, setUseDominantColorAsBg]}
+                    disabled={!showProfilePicture()}
+                  />
+                  <SettingColorPicker
+                    label="background color"
+                    signal={[backgroundColor, setBackgroundColor]}
                   />
                 </Stack>
-              </Stack>
+                <SettingSelect
+                  label="frame rate"
+                  signal={[frameRate, setFrameRate]}
+                  collection={frameRateCollection}
+                />
+              </Category>
+              <Category title="audio transcription">
+                <Box borderBottom="1px solid var(--colors-border-subtle)">
+                  <SettingCheckbox
+                    label="transcribe audio"
+                    setting={autoTranscribeSetting}
+                    signal={[
+                      autoTranscribe,
+                      (val) => {
+                        const newVal = setAutoTranscribe(val);
+                        if (newVal) preloadModel();
+                        return val;
+                      },
+                    ]}
+                  />
+                </Box>
+                <Box borderBottom="1px solid var(--colors-border-subtle)">
+                  <SettingSelect
+                    label="whisper model"
+                    signal={[whisperModel, setWhisperModel]}
+                    collection={whisperModelCollection}
+                  />
+                </Box>
+                <Text color="fg.subtle" p="2" fontSize="sm" fontWeight="normal">
+                  note: the model will only be downloaded once.
+                </Text>
+              </Category>
             </Stack>
           </Drawer.Body>
           <Drawer.Footer p="2" gap="3">

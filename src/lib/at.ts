@@ -35,6 +35,7 @@ export const sendPost = async (
   did: AtprotoDid,
   blob: Blob,
   postContent: string,
+  altText?: string,
 ) => {
   const login = await getSessionClient(did);
   const upload = await login.client.post("com.atproto.repo.uploadBlob", {
@@ -47,6 +48,7 @@ export const sendPost = async (
     embed: {
       $type: "app.bsky.embed.video",
       video: upload.data.blob,
+      alt: altText,
     },
     createdAt: new Date().toISOString(),
   };

@@ -12,6 +12,8 @@ import { tryFinalizeLogin } from "./lib/oauth";
 import { accounts, setAccounts } from "./lib/accounts";
 import { AtprotoDid } from "@atcute/lexicons/syntax";
 import { toaster } from "./components/Toaster";
+import { autoTranscribe } from "./lib/settings";
+import { preloadModel } from "./lib/transcribe";
 
 const root = document.getElementById("root");
 
@@ -52,5 +54,7 @@ tryFinalizeLogin()
       type: "error",
     });
   });
+
+if (autoTranscribe.get()) preloadModel();
 
 render(() => <App />, root!);

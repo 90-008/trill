@@ -1,4 +1,5 @@
 import {
+  CaptionsIcon,
   CircleAlertIcon,
   DownloadIcon,
   EllipsisVerticalIcon,
@@ -14,9 +15,10 @@ import { Account } from "~/lib/accounts";
 
 import { TaskState } from "~/lib/task";
 import PostDialog from "./PostDialog";
-import { Button } from "./ui/button";
+import { Button, ButtonProps } from "./ui/button";
 import { Menu } from "./ui/menu";
 import { createSignal } from "solid-js";
+import { toaster } from "./Toaster";
 
 const downloadFile = (blob: Blob, fileName: string) => {
   const url = URL.createObjectURL(blob);
@@ -53,15 +55,33 @@ const Task = (process: TaskState, selectedAccount: Account | undefined) => {
       </Popover.Positioner>
     </Popover.Root>
   );
-  const statusSuccess = (result: Blob) => {
+  const statusSuccess = (result: Blob, altText?: string) => {
+    const [menuOpen, setMenuOpen] = createSignal(false);
+    const MenuButton = (props: ButtonProps) => (
+      <Button
+        color={{ _hover: "colorPalette.emphasized" }}
+        variant="ghost"
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        {...props}
+        onClick={(e) => {
+          if (typeof props.onClick === "function") props.onClick(e);
+          setMenuOpen(false);
+        }}
+      />
+    );
     return (
       <>
         <PostDialog
           openSignal={[dialogOpen, setDialogOpen]}
           account={selectedAccount}
           result={result}
+          initialAltText={altText}
         />
         <Menu.Root
+          open={menuOpen()}
+          onOpenChange={(e) => setMenuOpen(e.open)}
           positioning={{ placement: "bottom-start", strategy: "fixed" }}
         >
           <Menu.Trigger
@@ -72,11 +92,10 @@ const Task = (process: TaskState, selectedAccount: Account | undefined) => {
             )}
           />
           <Menu.Positioner>
-            <Menu.Content>
+            <Menu.Content py="0">
               <Menu.ItemGroup>
-                <Button
-                  color={{ _hover: "colorPalette.emphasized" }}
-                  onClick={() =>
+                <MenuButton
+                  onClick={() => {
                     downloadFile(
                       result,
                       process.file.name
@@ -84,26 +103,35 @@ const Task = (process: TaskState, selectedAccount: Account | undefined) => {
                         .slice(0, -1)
                         .join(".")
                         .concat(".mp4"),
-                    )
-                  }
-                  variant="ghost"
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
+                    );
+                    toaster.create({
+                      title: "downloaded result file",
+                      type: "success",
+                      duration: 1000,
+                    });
+                  }}
                 >
                   download <DownloadIcon />
-                </Button>
-                <Button
-                  onClick={() => setDialogOpen(!dialogOpen())}
+                </MenuButton>
+                <MenuButton
+                  disabled={altText === undefined}
+                  onClick={() => {
+                    navigator.clipboard.writeText(altText!);
+                    toaster.create({
+                      title: "copied transcribed text to clipboard",
+                      type: "success",
+                      duration: 1000,
+                    });
+                  }}
+                >
+                  copy transcription <CaptionsIcon />
+                </MenuButton>
+                <MenuButton
                   disabled={selectedAccount === undefined}
-                  color={{ _hover: "colorPalette.emphasized" }}
-                  variant="ghost"
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
+                  onClick={() => setDialogOpen(!dialogOpen())}
                 >
                   post to bsky <SendIcon />
-                </Button>
+                </MenuButton>
               </Menu.ItemGroup>
             </Menu.Content>
           </Menu.Positioner>
@@ -123,7 +151,7 @@ const Task = (process: TaskState, selectedAccount: Account | undefined) => {
   const status = () => {
     switch (process.status) {
       case "success":
-        return statusSuccess(process.result);
+        return statusSuccess(process.result, process.altText);
       case "processing":
         return statusProcessing();
       default:

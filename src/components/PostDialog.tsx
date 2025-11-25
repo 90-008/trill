@@ -1,6 +1,6 @@
 import { Component, createSignal, Signal } from "solid-js";
 
-import { SendIcon, XIcon } from "lucide-solid";
+import { CaptionsIcon, SendIcon, XIcon } from "lucide-solid";
 import { Stack } from "styled-system/jsx";
 import { IconButton } from "~/components/ui/icon-button";
 import { Spinner } from "~/components/ui/spinner";
@@ -14,13 +14,18 @@ import { toaster } from "~/components/Toaster";
 import { Dialog } from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
 import { Account } from "~/lib/accounts";
+import { Popover } from "./ui/popover";
 
 const PostDialog = (props: {
   result: Blob;
   account: Account | undefined;
   openSignal: Signal<boolean>;
+  initialAltText?: string;
 }) => {
   const [postContent, setPostContent] = createSignal<string>("");
+  const [altText, setAltText] = createSignal<string>(
+    props.initialAltText ?? "",
+  );
   const [posting, setPosting] = createSignal(false);
   const [open, setOpen] = props.openSignal;
 
@@ -82,11 +87,43 @@ const PostDialog = (props: {
                   )}
                 />
               )}
+              <Popover.Root>
+                <Popover.Trigger
+                  asChild={(triggerProps) => (
+                    <IconButton
+                      {...triggerProps()}
+                      variant={altText() ? "solid" : "ghost"}
+                      size="sm"
+                    >
+                      <CaptionsIcon />
+                    </IconButton>
+                  )}
+                />
+                <Popover.Positioner>
+                  <Popover.Content width="sm">
+                    <Popover.Arrow />
+                    <Stack gap="2">
+                      <Popover.Title>video alt text</Popover.Title>
+                      <Textarea
+                        value={altText()}
+                        onInput={(e) => setAltText(e.currentTarget.value)}
+                        placeholder="describe the video content..."
+                        rows={4}
+                      />
+                    </Stack>
+                  </Popover.Content>
+                </Popover.Positioner>
+              </Popover.Root>
               <IconButton
                 disabled={posting()}
                 onClick={() => {
                   setPosting(true);
-                  sendPost(props.account?.did!, props.result, postContent())
+                  sendPost(
+                    props.account?.did!,
+                    props.result,
+                    postContent(),
+                    altText(),
+                  )
                     .then((result) => {
                       const parsedUri = parseCanonicalResourceUri(result.uri);
                       if (!parsedUri.ok) throw "failed to parse atproto uri";
