@@ -5,9 +5,11 @@
   nodejs,
   makeBinaryWrapper,
   memos-modules,
-  VITE_OAUTH_CLIENT_ID ? "http://localhost:3000",
+  oauthMetadata ? builtins.fromJSON (builtins.readFile ../src/lib/oauthMetadata.json),
+  VITE_OAUTH_CLIENT_ID ? oauthMetadata.client_id,
   VITE_OAUTH_REDIRECT_URL ? VITE_OAUTH_CLIENT_ID,
   VITE_CLIENT_URI ? VITE_OAUTH_CLIENT_ID,
+  VITE_OAUTH_SCOPE ? oauthMetadata.scope,
 }:
 stdenv.mkDerivation {
   name = "trill";
@@ -33,6 +35,7 @@ stdenv.mkDerivation {
     VITE_OAUTH_REDIRECT_URL
     VITE_OAUTH_CLIENT_ID
     VITE_CLIENT_URI
+    VITE_OAUTH_SCOPE
     ;
 
   dontCheck = true;

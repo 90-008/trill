@@ -8,12 +8,14 @@ export const makeOauthMetadata = (
   client_id: string,
   client_uri: string,
   redirect_uri: string,
+  scope: string,
 ) => ({
   ...oauthMetadata,
   client_id,
   client_uri,
   logo_uri: `${client_uri}/favicon.png`,
   redirect_uris: [redirect_uri],
+  scope,
 });
 
 export default defineConfig({
@@ -25,10 +27,12 @@ export default defineConfig({
           process.env.VITE_CLIENT_URI = "http://localhost:3000";
           const redirectUri = "http://127.0.0.1:3000";
           process.env.VITE_OAUTH_REDIRECT_URL = redirectUri;
+          const scope = oauthMetadata.scope;
+          process.env.VITE_OAUTH_SCOPE = scope;
           process.env.VITE_OAUTH_CLIENT_ID =
             `http://localhost` +
             `?redirect_uri=${encodeURIComponent(redirectUri)}` +
-            `&scope=${encodeURIComponent(oauthMetadata.scope)}`;
+            `&scope=${encodeURIComponent(scope)}`;
         }
       },
       configureServer(server) {
@@ -50,6 +54,7 @@ export default defineConfig({
                   process.env.VITE_OAUTH_CLIENT_ID!,
                   process.env.VITE_CLIENT_URI!,
                   process.env.VITE_OAUTH_REDIRECT_URL!,
+                  process.env.VITE_OAUTH_SCOPE!,
                 ),
                 null,
                 2,
@@ -69,6 +74,7 @@ export default defineConfig({
               process.env.VITE_OAUTH_CLIENT_ID!,
               process.env.VITE_CLIENT_URI!,
               process.env.VITE_OAUTH_REDIRECT_URL!,
+              process.env.VITE_OAUTH_SCOPE!,
             ),
             null,
             2,

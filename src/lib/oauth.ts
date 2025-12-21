@@ -17,24 +17,29 @@ import type { ActorIdentifier } from "@atcute/lexicons";
 import type { AtprotoDid } from "@atcute/lexicons/syntax";
 import { handleResolver, login } from "./at";
 import { loggingIn } from "./accounts";
-import { clientId, redirectUri } from "./oauthMetadata";
+import { clientId, redirectUri, scope } from "./oauthMetadata";
 
-configureOAuth({
-  metadata: {
+const setupOAuth = () => {
+  const metadata = {
     client_id: clientId,
     redirect_uri: redirectUri,
-  },
-  identityResolver: defaultIdentityResolver({
-    handleResolver,
+  };
+  console.log(metadata);
+  configureOAuth({
+    metadata,
+    identityResolver: defaultIdentityResolver({
+      handleResolver,
 
-    didDocumentResolver: new CompositeDidDocumentResolver({
-      methods: {
-        plc: new PlcDidDocumentResolver(),
-        web: new WebDidDocumentResolver(),
-      },
+      didDocumentResolver: new CompositeDidDocumentResolver({
+        methods: {
+          plc: new PlcDidDocumentResolver(),
+          web: new WebDidDocumentResolver(),
+        },
+      }),
     }),
-  }),
-});
+  });
+};
+setupOAuth();
 
 export const sessions = {
   get: async (did: AtprotoDid) => {
@@ -55,7 +60,7 @@ export const flow = {
   start: async (identifier: ActorIdentifier): Promise<void> => {
     const authUrl = await createAuthorizationUrl({
       target: { type: "account", identifier },
-      scope: "atproto transition:generic",
+      scope,
     });
     // recommended to wait for the browser to persist local storage before proceeding
     await new Promise((resolve) => setTimeout(resolve, 200));
