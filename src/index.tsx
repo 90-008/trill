@@ -14,6 +14,9 @@ import { AtprotoDid } from "@atcute/lexicons/syntax";
 import { toaster } from "./components/Toaster";
 import { autoTranscribe } from "./lib/settings";
 import { preloadModel } from "./lib/transcribe";
+import { Text } from "~/components/ui/text";
+import { Link } from "~/components/ui/link";
+import { HStack } from "styled-system/jsx";
 
 const root = document.getElementById("root");
 

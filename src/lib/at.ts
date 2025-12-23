@@ -32,14 +32,21 @@ export const login = async (agent: OAuthUserAgent) => {
   };
 };
 
+export type UploadStatus = {
+  stage: "auth" | "uploading" | "processing" | "posting" | "complete";
+  progress?: number;
+};
+
 export const sendPost = async (
   did: AtprotoDid,
   blob: Blob,
   postContent: string,
   altText?: string,
+  onStatus?: (status: UploadStatus) => void,
 ) => {
   const login = await getSessionClient(did);
 
+  onStatus?.({ stage: "auth" });
   const serviceAuthUrl = new URL(
     `${login.pds}/xrpc/com.atproto.server.getServiceAuth`,
   );
@@ -68,6 +75,7 @@ export const sendPost = async (
   const serviceAuth = await serviceAuthResponse.json();
   const token = serviceAuth.token;
 
+  onStatus?.({ stage: "uploading" });
   const uploadUrl = new URL(
     "https://video.bsky.app/xrpc/app.bsky.video.uploadVideo",
   );
@@ -91,6 +99,7 @@ export const sendPost = async (
   const jobStatus = await uploadResponse.json();
   let videoBlobRef = jobStatus.blob;
 
+  onStatus?.({ stage: "processing" });
   while (!videoBlobRef) {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -100,6 +109,7 @@ export const sendPost = async (
 
     if (!statusResponse.ok) {
       const error = await statusResponse.json();
+      // reuse blob
       if (error.error === "already_exists" && error.blob) {
         videoBlobRef = error.blob;
         break;
@@ -112,9 +122,15 @@ export const sendPost = async (
       videoBlobRef = status.jobStatus.blob;
     } else if (status.jobStatus.state === "JOB_STATE_FAILED") {
       throw `video processing failed: ${status.jobStatus.error || "unknown error"}`;
+    } else if (status.jobStatus.progress !== undefined) {
+      onStatus?.({
+        stage: "processing",
+        progress: status.jobStatus.progress,
+      });
     }
   }
 
+  onStatus?.({ stage: "posting" });
   const record: AppBskyFeedPost.Main = {
     $type: "app.bsky.feed.post",
     text: postContent,
@@ -135,5 +151,7 @@ export const sendPost = async (
   });
 
   if (!result.ok) throw `failed to upload post: ${result.data.error}`;
+
+  onStatus?.({ stage: "complete" });
   return result.data;
 };
