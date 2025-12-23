@@ -4,7 +4,7 @@
   "client_uri": "http://localhost:3000",
   "logo_uri": "http://localhost:3000/favicon.png",
   "redirect_uris": ["http://127.0.0.1:3000/"],
-  "scope": "atproto repo:app.bsky.feed.post?action=create blob:video/*",
+  "scope": "atproto repo:app.bsky.feed.post?action=create rpc:com.atproto.repo.uploadBlob?aud=* blob:video/*",
   "grant_types": ["authorization_code", "refresh_token"],
   "response_types": ["code"],
   "token_endpoint_auth_method": "none",

@@ -25,6 +25,7 @@ export const login = async (agent: OAuthUserAgent) => {
   if (!didDoc.ok) throw didDoc.data.error;
   return {
     client: rpc,
+    agent,
     did: res.data.did,
     handle: res.data.handle,
     pds: didDoc.data.pds,
@@ -38,20 +39,93 @@ export const sendPost = async (
   altText?: string,
 ) => {
   const login = await getSessionClient(did);
-  const upload = await login.client.post("com.atproto.repo.uploadBlob", {
-    input: blob,
+
+  const serviceAuthUrl = new URL(
+    `${login.pds}/xrpc/com.atproto.server.getServiceAuth`,
+  );
+  serviceAuthUrl.searchParams.append(
+    "aud",
+    login.pds!.replace("https://", "did:web:"),
+  );
+  serviceAuthUrl.searchParams.append("lxm", "com.atproto.repo.uploadBlob");
+  serviceAuthUrl.searchParams.append(
+    "exp",
+    (Math.floor(Date.now() / 1000) + 60 * 30).toString(),
+  ); // 30 minutes
+
+  const serviceAuthResponse = await login.agent.handle(
+    `${serviceAuthUrl.pathname}${serviceAuthUrl.search}`,
+    {
+      method: "GET",
+    },
+  );
+
+  if (!serviceAuthResponse.ok) {
+    const error = await serviceAuthResponse.text();
+    throw `failed to get service auth: ${error}`;
+  }
+
+  const serviceAuth = await serviceAuthResponse.json();
+  const token = serviceAuth.token;
+
+  const uploadUrl = new URL(
+    "https://video.bsky.app/xrpc/app.bsky.video.uploadVideo",
+  );
+  uploadUrl.searchParams.append("did", did);
+  uploadUrl.searchParams.append("name", "video.mp4");
+
+  const uploadResponse = await fetch(uploadUrl.toString(), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "video/mp4",
+    },
+    body: blob,
   });
-  if (!upload.ok) throw `failed to upload blob: ${upload.data.error}`;
+
+  if (!uploadResponse.ok) {
+    const error = await uploadResponse.text();
+    throw `failed to upload video: ${error}`;
+  }
+
+  const jobStatus = await uploadResponse.json();
+  let videoBlobRef = jobStatus.blob;
+
+  while (!videoBlobRef) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const statusResponse = await fetch(
+      `https://video.bsky.app/xrpc/app.bsky.video.getJobStatus?jobId=${jobStatus.jobId}`,
+    );
+
+    if (!statusResponse.ok) {
+      const error = await statusResponse.json();
+      if (error.error === "already_exists" && error.blob) {
+        videoBlobRef = error.blob;
+        break;
+      }
+      throw `failed to get job status: ${error.message || error.error}`;
+    }
+
+    const status = await statusResponse.json();
+    if (status.jobStatus.blob) {
+      videoBlobRef = status.jobStatus.blob;
+    } else if (status.jobStatus.state === "JOB_STATE_FAILED") {
+      throw `video processing failed: ${status.jobStatus.error || "unknown error"}`;
+    }
+  }
+
   const record: AppBskyFeedPost.Main = {
     $type: "app.bsky.feed.post",
     text: postContent,
     embed: {
       $type: "app.bsky.embed.video",
-      video: upload.data.blob,
+      video: videoBlobRef,
       alt: altText,
     },
     createdAt: new Date().toISOString(),
   };
+
   const result = await login.client.post("com.atproto.repo.createRecord", {
     input: {
       collection: "app.bsky.feed.post",
@@ -59,6 +133,7 @@ export const sendPost = async (
       repo: did,
     },
   });
+
   if (!result.ok) throw `failed to upload post: ${result.data.error}`;
   return result.data;
 };
