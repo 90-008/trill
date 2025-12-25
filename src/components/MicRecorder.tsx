@@ -30,10 +30,12 @@ const MicRecorder = (props: MicRecorderProps) => {
     navigator.vendor &&
     navigator.vendor.indexOf("Apple") > -1;
 
-  const preferredMimeType = isSafari
-    ? 'audio/mp4; codecs="mp4a.40.2"'
-    : "audio/webm;codecs=opus";
-  const fallbackMimeType = isSafari ? "audio/mp4" : "audio/webm";
+  // const preferredMimeType = isSafari
+  //   ? 'audio/mp4; codecs="mp4a.40.2"'
+  //   : "audio/webm;codecs=opus";
+  // const fallbackMimeType = isSafari ? "audio/mp4" : "audio/webm";
+  const preferredMimeType = "audio/webm; codecs=opus";
+  const fallbackMimeType = "audio/webm";
 
   const startRecording = async () => {
     if (isRecording()) return;
