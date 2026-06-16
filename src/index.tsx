@@ -9,7 +9,7 @@ import type {} from "@atcute/microcosm";
 
 import App from "./App";
 import { tryFinalizeLogin } from "./lib/oauth";
-import { accounts, setAccounts } from "./lib/accounts";
+import { accounts, setAccounts, setSelectedAccount } from "./lib/accounts";
 import { AtprotoDid } from "@atcute/lexicons/syntax";
 import { toaster } from "./components/Toaster";
 import { autoTranscribe } from "./lib/settings";
@@ -43,6 +43,7 @@ tryFinalizeLogin()
         handle: login.handle === "handle.invalid" ? undefined : login.handle,
       },
     ]);
+    setSelectedAccount(login.did as AtprotoDid);
     toaster.create({
       title: "login success",
       description: `logged in as ${login.handle}`,

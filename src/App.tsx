@@ -92,13 +92,25 @@ const App = () => {
   return (
     <>
       <VStack
-        py="8"
+        py={{ base: "8", smDown: "2" }}
         minH="100vh"
-        minW="100vw"
+        w="100vw"
         justifyContent="center"
         alignItems="center"
+        boxSizing="border-box"
+        h={{ smDown: "100dvh" }}
+        overflow={{ smDown: "hidden" }}
+        gap={{ base: "4", smDown: "2" }}
       >
-        <Card.Root maxW="3xl" w="94%" h="max">
+        <Card.Root
+          maxW="3xl"
+          w="94%"
+          flex={{ smDown: "1" }}
+          minH={{ smDown: "0" }}
+          overflow={{ smDown: "hidden" }}
+          display={{ smDown: "flex" }}
+          flexDir={{ smDown: "column" }}
+        >
           <Card.Header>
             <Card.Title w="full">
               <Stack direction="row" align="center">
@@ -118,10 +130,19 @@ const App = () => {
               </ol>
             </Card.Description>
           </Card.Header>
-          <Card.Body>
-            <Stack gap="4" direction={{ base: "row", smDown: "column" }}>
+          <Card.Body
+            overflow={{ smDown: "hidden" }}
+            flex={{ smDown: "1" }}
+            minH={{ smDown: "0" }}
+          >
+            <Stack
+              gap="4"
+              direction={{ base: "row", smDown: "column" }}
+              h={{ smDown: "full" }}
+            >
               <Upload
-                flex="4"
+                flex={{ base: "4", smDown: "0" }}
+                flexShrink="0"
                 acceptedFiles={[]}
                 onFileAccept={(e) =>
                   e.files.forEach((file) => addTask(selectedAccount(), file))
@@ -129,10 +150,11 @@ const App = () => {
               />
               <Tasks
                 flex="3"
-                minH="20rem"
-                maxH="20rem"
+                minH={{ base: "20rem", smDown: "0" }}
+                maxH={{ base: "20rem", smDown: "none" }}
+                flexGrow={{ smDown: "1" }}
                 minW="0"
-                overflowY="scroll"
+                overflowY="auto"
                 currentTasks={tasks.values().toArray()}
                 selectedAccount={accounts().find(
                   (account) => account.did === selectedAccount(),

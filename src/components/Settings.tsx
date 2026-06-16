@@ -297,6 +297,7 @@ const Settings = () => {
               placeholder="example.bsky.social"
               value={handle()}
               onInput={(e) => setHandle(e.currentTarget.value)}
+              onKeyDown={(e) => e.key === "Enter" && isHandleValid() && startAccountFlow()}
             />
           </Field.Root>
           <IconButton onClick={startAccountFlow} disabled={!isHandleValid()}>
