@@ -1,3 +1,5 @@
+![trill](./screenshot.png)
+
 ## trill
 
 a webapp that converts voice memos into videos, ready for posting on bluesky (or perhaps elsewhere!).
