@@ -111,3 +111,8 @@ export const getSessionClient = async (did: AtprotoDid) => {
   if (!session) throw `no session found for ${did}`;
   return await login(session);
 };
+
+export const relogin = async (did: AtprotoDid): Promise<void> => {
+  loggingIn.set(did);
+  await flow.start(did);
+};

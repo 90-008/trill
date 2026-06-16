@@ -17,6 +17,8 @@ import { FastAverageColor } from "fast-average-color";
 import { toaster } from "~/components/Toaster";
 import { parseColor } from "@ark-ui/solid";
 import { transcribe } from "./transcribe";
+import { isSessionExpired } from "./at";
+import { showSessionExpiredToast } from "./sessionExpired";
 
 export type TaskState = { file: File } & (
   | { status: "processing" }
@@ -102,10 +104,19 @@ export const addTask = async (
     });
   } catch (error) {
     console.error(error);
-    tasks.set(id, {
-      file,
-      status: "error",
-      error: `failed to process audio: ${error}`,
-    });
+    if (isSessionExpired(error) && did) {
+      showSessionExpiredToast(did);
+      tasks.set(id, {
+        file,
+        status: "error",
+        error: "session expired, please re-login in settings.",
+      });
+    } else {
+      tasks.set(id, {
+        file,
+        status: "error",
+        error: `failed to process audio: ${error}`,
+      });
+    }
   }
 };

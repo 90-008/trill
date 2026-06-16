@@ -1,9 +1,23 @@
 import { XrpcHandleResolver } from "@atcute/identity-resolver";
-import { OAuthUserAgent } from "@atcute/oauth-browser-client";
+import { OAuthUserAgent, TokenRefreshError } from "@atcute/oauth-browser-client";
 import { Client as AtcuteClient, simpleFetchHandler } from "@atcute/client";
 import { getSessionClient } from "./oauth";
 import { AppBskyFeedPost } from "@atcute/bluesky";
 import { AtprotoDid } from "@atcute/lexicons/syntax";
+
+/** Returns true when the error is caused by an expired or revoked session. */
+export const isSessionExpired = (err: unknown): boolean => {
+  if (err instanceof TokenRefreshError) return true;
+  if (err instanceof Error) {
+    const msg = err.message.toLowerCase();
+    if (msg.includes("invalid_grant") || msg.includes("invalid_token")) return true;
+  }
+  if (typeof err === "string") {
+    const msg = err.toLowerCase();
+    if (msg.includes("invalid_grant") || msg.includes("invalid_token")) return true;
+  }
+  return false;
+};
 
 export const slingshotUrl = "https://slingshot.microcosm.blue";
 

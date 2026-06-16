@@ -9,7 +9,8 @@ import { Link } from "~/components/ui/link";
 
 import { parseCanonicalResourceUri } from "@atcute/lexicons/syntax";
 import { css } from "styled-system/css";
-import { sendPost, UploadStatus } from "~/lib/at";
+import { sendPost, UploadStatus, isSessionExpired } from "~/lib/at";
+import { showSessionExpiredToast } from "~/lib/sessionExpired";
 import { toaster } from "~/components/Toaster";
 import { Dialog } from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
@@ -200,11 +201,15 @@ const PostDialog = (props: {
                       setOpen(false);
                     })
                     .catch((error) => {
-                      toaster.create({
-                        title: "send post failed",
-                        description: error,
-                        type: "error",
-                      });
+                      if (isSessionExpired(error) && props.account?.did) {
+                        showSessionExpiredToast(props.account.did);
+                      } else {
+                        toaster.create({
+                          title: "send post failed",
+                          description: error,
+                          type: "error",
+                        });
+                      }
                     })
                     .finally(() => {
                       setPosting(false);
