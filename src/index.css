@@ -9,6 +9,15 @@
     border-bottom-width: 2px;
 }
 
+/* softer card shadow + subtle accent top border on main card only */
+.card__root {
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.12), 0px 0px 1px rgba(0, 0, 0, 0.12);
+}
+
+.main-card {
+    border-top: 3px solid rgba(255, 230, 41, 0.6);
+}
+
 /* ── flowing audio waveform background ─────────────────────── */
 .wave-bg {
     position: fixed;

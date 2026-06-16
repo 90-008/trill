@@ -30,6 +30,8 @@ const makeSinePath = (y: number, amp: number, λ: number): string => {
   for (let x = 0.5; x <= 200.5; x += 0.5) {
     d += ` L${x.toFixed(1)},${(y + amp * Math.sin((2 * Math.PI * x) / λ)).toFixed(2)}`;
   }
+  // close down to bottom-right, across to bottom-left, back to start
+  d += ` L200,100 L0,100 Z`;
   return d;
 };
 
@@ -129,7 +131,7 @@ const App = () => {
                 '--wave-op': w.op,
               }}
             >
-              <path d={w.d} fill="none" stroke="#ffe629" stroke-width="0.22" />
+              <path d={w.d} fill="#ffe629" fill-opacity="0.2" stroke="#ffe629" stroke-width="0.22" />
             </svg>
           )}
         </For>
@@ -146,6 +148,7 @@ const App = () => {
         gap={{ base: "4", smDown: "2" }}
       >
         <Card.Root
+          class="main-card"
           maxW="3xl"
           w="94%"
           flex={{ smDown: "1" }}
