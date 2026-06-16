@@ -25,28 +25,30 @@ import { Link } from "./components/ui/link";
 
 // Pre-compute waveform SVG paths at module load (viewBox: 200 wide × 100 tall).
 // translateX(-50%) on a 200%-wide SVG scrolls exactly one screen width → seamless loop.
-const makeSinePath = (y: number, amp: number, λ: number): string => {
+const makeSineStrokePath = (y: number, amp: number, λ: number): string => {
   let d = `M0,${y}`;
   for (let x = 0.5; x <= 200.5; x += 0.5) {
     d += ` L${x.toFixed(1)},${(y + amp * Math.sin((2 * Math.PI * x) / λ)).toFixed(2)}`;
   }
-  // close down to bottom-right, across to bottom-left, back to start
-  d += ` L200,100 L0,100 Z`;
   return d;
+};
+
+const makeSineFillPath = (y: number, amp: number, λ: number): string => {
+  return makeSineStrokePath(y, amp, λ) + ` L200,100 L0,100 Z`;
 };
 
 // Each track: y position (0-100), amplitude, wavelength, scroll speed, delay, opacity weight.
 // λ must divide 100 (the scroll offset in viewBox units) for a seamless loop:
 // sin(2π × 100/λ) = sin(0) only when 100/λ is a whole number → λ ∈ {20, 25, 50, …}
 const WAVE_TRACKS = [
-  { d: makeSinePath(10,  2.0, 20), dur: '30s', delay: '0s',    op: 0.90 },
-  { d: makeSinePath(22,  3.2, 25), dur: '44s', delay: '-8s',   op: 0.55 },
-  { d: makeSinePath(34,  1.5, 20), dur: '24s', delay: '-14s',  op: 1.00 },
-  { d: makeSinePath(46,  3.5, 25), dur: '38s', delay: '-5s',   op: 0.50 },
-  { d: makeSinePath(56,  2.0, 20), dur: '33s', delay: '-20s',  op: 0.80 },
-  { d: makeSinePath(68,  2.8, 50), dur: '52s', delay: '-12s',  op: 0.45 },
-  { d: makeSinePath(79,  1.8, 25), dur: '28s', delay: '-18s',  op: 0.70 },
-  { d: makeSinePath(90,  2.2, 20), dur: '36s', delay: '-3s',   op: 0.60 },
+  { fillD: makeSineFillPath(10,  2.0, 20), strokeD: makeSineStrokePath(10,  2.0, 20), dur: '30s', delay: '0s',    op: 0.90 },
+  { fillD: makeSineFillPath(22,  3.2, 25), strokeD: makeSineStrokePath(22,  3.2, 25), dur: '44s', delay: '-8s',   op: 0.55 },
+  { fillD: makeSineFillPath(34,  1.5, 20), strokeD: makeSineStrokePath(34,  1.5, 20), dur: '24s', delay: '-14s',  op: 1.00 },
+  { fillD: makeSineFillPath(46,  3.5, 25), strokeD: makeSineStrokePath(46,  3.5, 25), dur: '38s', delay: '-5s',   op: 0.50 },
+  { fillD: makeSineFillPath(56,  2.0, 20), strokeD: makeSineStrokePath(56,  2.0, 20), dur: '33s', delay: '-20s',  op: 0.80 },
+  { fillD: makeSineFillPath(68,  2.8, 50), strokeD: makeSineStrokePath(68,  2.8, 50), dur: '52s', delay: '-12s',  op: 0.45 },
+  { fillD: makeSineFillPath(79,  1.8, 25), strokeD: makeSineStrokePath(79,  1.8, 25), dur: '28s', delay: '-18s',  op: 0.70 },
+  { fillD: makeSineFillPath(90,  2.2, 20), strokeD: makeSineStrokePath(90,  2.2, 20), dur: '36s', delay: '-3s',   op: 0.60 },
 ];
 
 const App = () => {
@@ -131,7 +133,8 @@ const App = () => {
                 '--wave-op': w.op,
               }}
             >
-              <path d={w.d} fill="#ffe629" fill-opacity="0.2" stroke="#ffe629" stroke-width="0.22" />
+              <path d={w.fillD} fill="#ffe629" fill-opacity="0.2" />
+              <path d={w.strokeD} fill="none" stroke="#ffe629" stroke-width="0.22" />
             </svg>
           )}
         </For>
